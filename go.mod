@@ -1,6 +1,6 @@
 module github.com/libdns/luadns
 
-go 1.18
+go 1.24
 
 require (
 	github.com/libdns/libdns v0.2.1
