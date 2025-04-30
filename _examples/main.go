@@ -36,32 +36,67 @@ func main() {
 	}
 
 	ctx := context.Background()
+	fmt.Println("===> Running ListZones ...")
+	zones, err := provider.ListZones(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for _, z := range zones {
+		fmt.Println(z)
+	}
+
+	fmt.Println("===> Running GetRecords ...")
 	records, err := provider.GetRecords(ctx, zone)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("===> Running GetRecords ...")
 	for _, r := range records {
 		fmt.Println(r)
 	}
 
-	fmt.Println("===> Running SetRecords ...")
-	records, err = provider.SetRecords(ctx, zone, records)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	fmt.Println("===> Running AppendRecords ...")
-	records, err = provider.AppendRecords(ctx, zone, []libdns.Record{
-		libdns.Record{Name: "_acme-challenge", Type: "TXT", Value: "Hello, world!", TTL: 3600 * time.Second},
+	created, err := provider.AppendRecords(ctx, zone, []libdns.Record{
+		libdns.RR{
+			Name: "foo",
+			Type: "TXT",
+			Data: "foo",
+			TTL:  3600 * time.Second,
+		},
 	})
 	if err != nil {
 		log.Fatalln(err)
 	}
+	for _, r := range created {
+		fmt.Println("created", r)
+	}
 
-	fmt.Println("===> Running DeleteRecords ...")
-	_, err = provider.DeleteRecords(ctx, zone, records)
+	fmt.Println("===> Running SetRecords ...")
+	updated, err := provider.SetRecords(ctx, zone, []libdns.Record{
+		libdns.RR{
+			Name: "foo",
+			Type: "TXT",
+			Data: "bar",
+			TTL:  3600 * time.Second,
+		},
+	})
 	if err != nil {
 		log.Fatalln(err)
+	}
+	for _, r := range updated {
+		fmt.Println("updated", r)
+	}
+
+	fmt.Println("===> Running DeleteRecords ...")
+	deleted, err := provider.DeleteRecords(ctx, zone, []libdns.Record{
+		libdns.RR{
+			Name: "foo",
+			Type: "TXT",
+		},
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for _, r := range deleted {
+		fmt.Println("deleted", r)
 	}
 }
