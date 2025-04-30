@@ -14,6 +14,15 @@ func unFQDN(fqdn string) string {
 	return strings.TrimSuffix(fqdn, ".")
 }
 
+// toFQDN converts name in FQDN format.
+func toFQDN(name string) string {
+	if !strings.HasSuffix(name, ".") {
+		return name + "."
+	}
+
+	return name
+}
+
 // newLibRecord builds a libdns Record from the provider Record.
 func newLibRecord(r *luadns.Record, zone string) libdns.Record {
 	return libdns.Record{
@@ -29,7 +38,7 @@ func newLibRecord(r *luadns.Record, zone string) libdns.Record {
 func newLuaRecord(r libdns.Record, zone string) (*luadns.Record, error) {
 	pr := &luadns.Record{
 		Type:    r.Type,
-		Name:    libdns.AbsoluteName(r.Name, zone),
+		Name:    toFQDN(libdns.AbsoluteName(r.Name, zone)),
 		Content: r.Value,
 		TTL:     uint32(r.TTL.Seconds()),
 	}
